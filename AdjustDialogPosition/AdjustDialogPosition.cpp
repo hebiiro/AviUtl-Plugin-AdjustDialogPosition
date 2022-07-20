@@ -13,12 +13,17 @@ void ___outputLog(LPCTSTR text, LPCTSTR output)
 DLGPROC true_dialogProc = 0;
 INT_PTR CALLBACK hook_dialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	DLGPROC dlgProc = (DLGPROC)::GetProp(hwnd, _T("AdjustDialogPosition"));
+
+	if (!dlgProc)
+		::SetProp(hwnd, _T("AdjustDialogPosition"), dlgProc = true_dialogProc);
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
 		{
 			// デフォルト処理を先に実行する。
-			INT_PTR result = true_dialogProc(hwnd, message, wParam, lParam);
+			INT_PTR result = dlgProc(hwnd, message, wParam, lParam);
 
 			// モニタ情報を取得する。
 			HMONITOR monitor = ::MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
@@ -47,7 +52,7 @@ INT_PTR CALLBACK hook_dialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		}
 	}
 
-	return true_dialogProc(hwnd, message, wParam, lParam);
+	return dlgProc(hwnd, message, wParam, lParam);
 }
 
 DECLARE_HOOK_PROC(INT_PTR, WINAPI, DialogBoxParamA, (HINSTANCE instance, LPCSTR templateName, HWND parent, DLGPROC dialogProc, LPARAM initParam));
@@ -99,7 +104,7 @@ BOOL func_exit(AviUtl::FilterPlugin* fp)
 EXTERN_C AviUtl::FilterPluginDLL* CALLBACK GetFilterTable()
 {
 	LPCSTR name = "ダイアログ位置調整";
-	LPCSTR information = "ダイアログ位置調整 1.0.0 by 蛇色";
+	LPCSTR information = "ダイアログ位置調整 1.0.1 by 蛇色";
 
 	static AviUtl::FilterPluginDLL filter =
 	{
